@@ -8,35 +8,46 @@ const Login = ({ navigation }) => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post("http://localhost:3000/login", {
+      const response = await axios.post("http://192.168.55.1:3000/login", {
         email,
         password,
       });
+
+      // Show success alert
       Alert.alert("Success", response.data.message);
-      // Navigate to a different page or store token for further use
+
+      // Navigate to LinesList page
+      navigation.navigate("LinesList");
     } catch (error) {
-      Alert.alert("Error", error.response?.data?.error || "Login failed");
+      // Handle error during login
+      Alert.alert("Error"+error, error.response?.data?.error );
     }
   };
 
   return (
     <View style={{ padding: 20 }}>
-      <Text>Login</Text>
+      <Text style={{ fontSize: 24, marginBottom: 20 }}>Login</Text>
       <TextInput
         placeholder="Email"
         value={email}
+        placeholderTextColor="#A9A9A9"
         onChangeText={setEmail}
-        style={{ borderBottomWidth: 1, marginBottom: 10 }}
+        style={{ borderBottomWidth: 1, marginBottom: 10, fontSize: 16 }}
       />
       <TextInput
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        style={{ borderBottomWidth: 1, marginBottom: 10 }}
+        placeholderTextColor="#A9A9A9"
+        style={{ borderBottomWidth: 1, marginBottom: 10, fontSize: 16 ,color:'#000000'}}
       />
       <Button title="Login" onPress={handleLogin} />
-      <Button title="Signup Instead" onPress={() => navigation.navigate("Signup")} />
+      <Button
+        title="Signup Instead"
+        onPress={() => navigation.navigate("Signup")}
+        color="#6c757d"
+      />
     </View>
   );
 };
