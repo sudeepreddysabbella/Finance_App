@@ -1,11 +1,9 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert,navigation } from "react-native";
 
 const LinesPage = ({ navigation }) => {
   const handlePress = (line) => {
-    Alert.alert(`You pressed ${line}`);
-    // Uncomment this if navigation to a new page is needed
-    // navigation.navigate(line); 
+    navigation.navigate("Lines", { line });
   };
 
   return (

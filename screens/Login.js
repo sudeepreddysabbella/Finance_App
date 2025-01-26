@@ -6,16 +6,14 @@ const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const BASE_URL = "http://192.168.55.101:3000";
+
   const handleLogin = async () => {
     try {
-      const response = await axios.post("http://192.168.55.1:3000/login", {
+      const response = await axios.post(`${BASE_URL}/Login`, {
         email,
         password,
       });
-
-      // Show success alert
-      Alert.alert("Success", response.data.message);
-
       // Navigate to LinesList page
       navigation.navigate("LinesList");
     } catch (error) {

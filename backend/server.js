@@ -1,5 +1,6 @@
 
 
+
 const express = require("express");
 const { Pool } = require("pg");
 const bodyParser = require("body-parser");
@@ -30,28 +31,37 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Signup Route
 
 app.post("/signup", async (req, res) => {
-    const { name, email, password } = req.body;
+  console.log("Received signup request");
+  console.log("Request body:", req.body);
 
-    // Validate Input
-    if (!name || !email || !password) {
-        return res.status(400).json({ error: "All fields are required" });
-    }
+  const { name, email, password } = req.body;
 
-    try {
-        // Hash Password
-        const hashedPassword = await bcrypt.hash(password, 10);
+  // Log individual fields
+  console.log("Name:", name);
+  console.log("Email:", email);
+  console.log("Password length:", password ? password.length : "No password");
 
-        // Insert into PostgreSQL
-        const query = "INSERT INTO users (name, email, password) VALUES ($1, $2, $3)";
-        await pool.query(query, [name, email, hashedPassword]);
+  // Validate Input
+  if (!name || !email || !password) {
+      console.log("Validation failed: Missing fields");
+      return res.status(400).json({ error: "All fields are required" });
+  }
 
-        res.status(200).json({ message: "User signed up successfully!" });
-    } catch (error) {
-        console.error("Error inserting user:", error);
-        res.status(500).json({ error: "An error occurred during signup" });
-    }
+  try {
+      // Hash Password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Insert into PostgreSQL
+      const query = "INSERT INTO users (name, email, password) VALUES ($1, $2, $3)";
+      await pool.query(query, [name, email, hashedPassword]);
+
+      console.log("User inserted successfully");
+      res.status(200).json({ message: "User signed up successfully!" });
+  } catch (error) {
+      console.error("Detailed error inserting user:", error);
+      res.status(500).json({ error: "An error occurred during signup", details: error.message });
+  }
 });
-
 
 // Login Endpoint
 app.post("/login", async (req, res) => {
@@ -78,4 +88,4 @@ app.post("/login", async (req, res) => {
 
 // Start Server
 const PORT = 3000;
-app.listen(PORT, () => console.log(`Server running on http://192.168.55.1:${PORT}`));
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
