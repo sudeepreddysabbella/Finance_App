@@ -6,7 +6,7 @@ const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const BASE_URL = "http://192.168.55.101:3000";
+  const BASE_URL = "http://192.168.19.140:3000";
 
   const handleLogin = async () => {
     try {
@@ -14,11 +14,11 @@ const Login = ({ navigation }) => {
         email,
         password,
       });
-      // Navigate to LinesList page
+      console.log("Login Successful:", response.data);
       navigation.navigate("LinesList");
     } catch (error) {
-      // Handle error during login
-      Alert.alert("Error"+error, error.response?.data?.error );
+      console.log("Axios Error:", error.toJSON());
+      Alert.alert("Login Failed", error.message);
     }
   };
 
@@ -38,7 +38,7 @@ const Login = ({ navigation }) => {
         onChangeText={setPassword}
         secureTextEntry
         placeholderTextColor="#A9A9A9"
-        style={{ borderBottomWidth: 1, marginBottom: 10, fontSize: 16 ,color:'#000000'}}
+        style={{ borderBottomWidth: 1, marginBottom: 10, fontSize: 16 }}
       />
       <Button title="Login" onPress={handleLogin} />
       <Button

@@ -7,6 +7,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 
 const app = express();
@@ -23,7 +24,7 @@ const pool = new Pool({
 });
 
 // Secret for JWT
-require("dotenv").config();
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
 
@@ -85,6 +86,93 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ error: "Error logging in" });
   }
 });
+
+
+//adding new data 
+
+
+app.post("/add-customer", async (req, res) => {
+  try {
+    const {
+      serialnumber,
+      name,
+      date,
+      phonenumber,
+      principalnumber,
+      totalamount,
+      numberofinstallments,
+      address,
+    } = req.body;
+
+    console.log("Received Data:", req.body); // Debugging log
+
+    // Check if all fields are provided
+    if (!serialnumber || !name || !date || !phonenumber || !principalnumber || !totalamount || !numberofinstallments || !address) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+
+    // Validate input formats
+    if (!/^\d{4}$/.test(serialnumber)) {
+      return res.status(400).json({ error: "Serial number must be a 4-digit number." });
+    }
+    if (!/^\d{10}$/.test(phonenumber)) {
+      return res.status(400).json({ error: "Phone number must be a 10-digit number." });
+    }
+    if (principalnumber <= 0 || totalamount <= 0 || numberofinstallments <= 0) {
+      return res.status(400).json({ error: "Principal, total amount, and installments must be positive numbers." });
+    }
+
+    // Insert into database
+    const query = `
+      INSERT INTO line1
+      (serialnumber, name, date, phonenumber, principalnumber, totalamount, numberofinstallments, address)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `;
+
+    const values = [serialnumber, name, date, phonenumber, principalnumber, totalamount, numberofinstallments, address];
+
+    await pool.query(query, values);
+
+    res.status(200).json({ message: "Customer added successfully!" });
+  } catch (error) {
+    console.error("Database Error:", error); // This will log the exact error
+    res.status(500).json({ error: "Failed to add customer. Check server logs for details." });
+  }
+});
+
+// get the customer details
+
+app.get("/", (req, res) => {
+  res.send("Server is running!");
+});
+
+// ✅ Fix: Ensure Route Works
+// app.get("/customers", async (req, res) => {
+//   try {
+//     console.log("Fetching customers from database...");
+//     const result = await pool.query("SELECT serialnumber,name,phonenumber,totalamount,address FROM line1 ORDER BY serialnumber ASC");
+//     console.log("Fetched customers:", result.rows);
+//     res.json(result.rows);
+//   } catch (error) {
+//     console.error("Error fetching customers:", error.message);
+//     console.log(error);
+//     res.status(500).json({ error: "Database Query Failed" });
+//   }
+// });
+
+app.get("/customers", async (req, res) => {
+  try {
+    console.log("Fetching customers from database...");
+    const result = await pool.query("SELECT * FROM line1 ORDER BY serialnumber ASC");
+    console.log("Fetched customers:", result.rows);
+    
+    res.json(result.rows); // Send JSON response
+  } catch (error) {
+    console.error("Error fetching customers:", error.message);
+    res.status(500).json({ error: "Database Query Failed", details: error.message });
+  }
+});
+
 
 // Start Server
 const PORT = 3000;

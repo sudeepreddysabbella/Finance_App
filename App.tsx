@@ -8,6 +8,8 @@ import Login from "./screens/Login";
 import Signup from "./screens/Signup";
 import LinesList from "./screens/LinesList";
 import Lines from "./screens/Lines";
+import AddNew from "./screens/AddNew";
+import Customers from "./screens/Customers";
 
 const Stack = createStackNavigator();
 
@@ -20,6 +22,8 @@ export default function App() {
         <Stack.Screen name="Signup" component={Signup} />
         <Stack.Screen name="LinesList" component={LinesList} />
         <Stack.Screen name="Lines" component={Lines} />
+        <Stack.Screen name="AddNew" component={AddNew} />
+        <Stack.Screen name="Customers" component={Customers} />
       </Stack.Navigator>
     </NavigationContainer>
   );
