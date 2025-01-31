@@ -6,7 +6,7 @@ const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const BASE_URL = "http://192.168.19.140:3000";
+  const BASE_URL = "http://192.168.55.101:3000";
 
   const handleLogin = async () => {
     try {

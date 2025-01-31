@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, Button, Alert, StyleSheet, ScrollView } from "react-native";
 
 
-const BASE_URL = "http://192.168.55.103:3000";
-
+const BASE_URL = "http://192.168.55.101:3000";
 const AddNew = () => {
   const [formData, setFormData] = useState({
     serialnumber: "",

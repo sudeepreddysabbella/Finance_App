@@ -10,6 +10,8 @@ import LinesList from "./screens/LinesList";
 import Lines from "./screens/Lines";
 import AddNew from "./screens/AddNew";
 import Customers from "./screens/Customers";
+import Collections from "./screens/Collections";
+import CollectionData  from "./screens/CollectionData";
 
 const Stack = createStackNavigator();
 
@@ -24,6 +26,8 @@ export default function App() {
         <Stack.Screen name="Lines" component={Lines} />
         <Stack.Screen name="AddNew" component={AddNew} />
         <Stack.Screen name="Customers" component={Customers} />
+        <Stack.Screen name="Collections" component={Collections} />
+        <Stack.Screen name="CollectionData" component={CollectionData} />
       </Stack.Navigator>
     </NavigationContainer>
   );
