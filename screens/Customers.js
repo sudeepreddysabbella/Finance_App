@@ -11,7 +11,7 @@ import {
 } from "react-native";
 
 const Customers = () => {
-  const BASE_URL = "http://192.168.55.101:3000";
+  const BASE_URL = "http://192.168.63.140:3000";
   const [customers, setCustomers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);

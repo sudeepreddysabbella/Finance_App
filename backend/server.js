@@ -174,6 +174,76 @@ app.get("/customers", async (req, res) => {
 });
 
 
+app.get("/getData/:day", async (req, res) => {
+  const { day } = req.params; // Extract day from request parameters
+
+  const validDays = [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+  ];
+
+  if (!validDays.includes(day.toLowerCase())) {
+    return res.status(400).json({ message: "Invalid day provided" });
+  }
+
+  try {
+    const tableName = `"${day.toLowerCase()}"`; // Ensure proper table name format
+
+    // Query data from the respective day's table using parameterized query
+    const result = await pool.query(`SELECT serialnumber, name, amount_paid FROM ${tableName} ORDER BY serialnumber ASC`);
+
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error("Database error:", error.message);
+    res.status(500).json({ success: false, message: "Error fetching data", error: error.message });
+  }
+});
+
+// for posting the collection
+
+app.post("/addData/:day", async (req, res) => {
+  const { day } = req.params;
+  const { serialnumber, name, amount_paid, installment } = req.body;
+
+  // Validate input fields
+  if (!serialnumber || !name || !amount_paid || !installment === undefined) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  // Validate the provided day
+  const validDays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+  const lowerDay = day.toLowerCase();
+
+  if (!validDays.includes(lowerDay)) {
+    return res.status(400).json({ message: "Invalid day provided" });
+  }
+
+  try {
+    const tableName = `"${lowerDay}"`; // Ensuring valid table naming convention
+
+    // Insert query using parameterized values
+    const query = `INSERT INTO ${tableName} (serialnumber, name, amount_paid, installment) 
+                   VALUES ($1, $2, $3, $4) RETURNING *`;
+    
+
+    const result = await pool.query(query, [serialnumber, name, amount_paid, installment]);
+
+    res.status(201).json({
+      success: true,
+      message: "Customer added successfully",
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Database Error:", error);
+    res.status(500).json({ success: false, message: "Server Error", error: error.message });
+  }
+});
+
 // Start Server
 const PORT = 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

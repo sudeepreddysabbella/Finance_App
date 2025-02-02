@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 
-const API_URL = "http://192.168.55.101:5000"; // Update the URL to match the backend server port
+const API_URL = "http://192.168.63.140:3000"; // Update with your backend server IP
 
 const CollectionData = () => {
   const route = useRoute();
@@ -20,7 +20,12 @@ const CollectionData = () => {
   const [dayData, setDayData] = useState([]);
   const [totalSum, setTotalSum] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [newCustomer, setNewCustomer] = useState({ name: "", amount_paid: "" });
+  const [newCustomer, setNewCustomer] = useState({
+    serialnumber: "",
+    name: "",
+    amount_paid: "",
+    installment: "",
+  });
 
   useEffect(() => {
     fetchDayData();
@@ -30,52 +35,58 @@ const CollectionData = () => {
     try {
       const response = await fetch(`${API_URL}/getData/${selectedDay.toLowerCase()}`);
       const data = await response.json();
-      setDayData(data);
+
+      if (data.success) {
+        setDayData(data.data); // Ensure correct structure
+      } else {
+        Alert.alert("Error", "No data available for this day.");
+      }
     } catch (error) {
       Alert.alert("Error", "Failed to fetch data");
+      console.error("Fetch error:", error);
     }
   };
 
   const handleGetTotalSum = () => {
-     let sum = dayData.reduce((acc, entry) => acc + entry.amount_paid, 0);
+    let sum = dayData.reduce((acc, entry) => acc + parseFloat(entry.amount_paid), 0);
     setTotalSum(sum.toFixed(2)); // Rounding to 2 decimal places
   };
 
   const handleAddCustomer = async () => {
-    if (!newCustomer.name || !newCustomer.amount_paid) {
+    if (!newCustomer.name || !newCustomer.amount_paid || !newCustomer.serialnumber || !newCustomer.installment) {
       Alert.alert("Error", "Please enter all fields");
       return;
     }
-  
-    const serialnumber = Math.floor(Math.random() * 9000 + 1000); // Generate a 4-digit serial number
-  
+
     const customerData = {
-      serialnumber,
+      serialnumber: newCustomer.serialnumber,
       name: newCustomer.name,
       amount_paid: parseFloat(newCustomer.amount_paid),
+      installment: newCustomer.installment,
     };
-  
+
     try {
       const response = await fetch(`${API_URL}/addData/${selectedDay.toLowerCase()}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(customerData),
       });
-  
-      if (response.ok) {
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
         Alert.alert("Success", "Customer added successfully");
         setModalVisible(false);
-        setNewCustomer({ name: "", amount_paid: "" });
+        setNewCustomer({ serialnumber: "", name: "", amount_paid: "", installment: "" });
         fetchDayData(); // Refresh data
       } else {
-        const errorData = await response.json();
-        Alert.alert("Error", errorData.message || "Failed to add customer");
+        Alert.alert("Error", result.message || "Failed to add customer");
       }
     } catch (error) {
       Alert.alert("Error", "Failed to connect to server");
+      console.error("Add customer error:", error);
     }
   };
-  
 
   return (
     <View style={styles.container}>
@@ -118,17 +129,17 @@ const CollectionData = () => {
             <TextInput
               style={styles.input}
               placeholder="Serial Number (4-digit)"
+              keyboardType="numeric"
               value={newCustomer.serialnumber}
               onChangeText={(text) => setNewCustomer({ ...newCustomer, serialnumber: text })}
-              placeholderTextColor={"#000000"}
-              editable={false} // Serial number is auto-generated
+              placeholderTextColor={"#000"}
             />
             <TextInput
               style={styles.input}
               placeholder="Enter Name"
               value={newCustomer.name}
               onChangeText={(text) => setNewCustomer({ ...newCustomer, name: text })}
-              placeholderTextColor={"#000000"}
+              placeholderTextColor={"#000"}
             />
 
             <TextInput
@@ -137,7 +148,15 @@ const CollectionData = () => {
               keyboardType="numeric"
               value={newCustomer.amount_paid}
               onChangeText={(text) => setNewCustomer({ ...newCustomer, amount_paid: text })}
-              placeholderTextColor={"#000000"}
+              placeholderTextColor={"#000"}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Installment"
+              keyboardType="numeric"
+              value={newCustomer.installment}
+              onChangeText={(text) => setNewCustomer({ ...newCustomer, installment: text })}
+              placeholderTextColor={"#000"}
             />
 
             <View style={styles.modalButtons}>
@@ -149,7 +168,6 @@ const CollectionData = () => {
                 <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
-
           </View>
         </View>
       </Modal>
@@ -186,17 +204,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  resultContainer: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: "#fff",
-    borderRadius: 5,
-    width: "80%",
-    alignItems: "center",
-  },
-  resultText: { fontSize: 18, fontWeight: "bold" },
-
-  /* Modal Styles */
   modalContainer: {
     flex: 1,
     justifyContent: "center",

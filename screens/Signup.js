@@ -9,7 +9,7 @@ const Signup = ({ navigation }) => {
   const [password, setPassword] = useState("");
 
   const BASE_URL =
-  Platform.OS === "android" ? "http://192.168.55.101:3000" : "http://localhost:3000";
+  Platform.OS === "android" ? "http://192.168.63.140:3000" : "http://localhost:3000";
 
 
   const handleSignup = async () => {
