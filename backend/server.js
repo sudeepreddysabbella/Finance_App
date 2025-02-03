@@ -211,7 +211,7 @@ app.post("/addData/:day", async (req, res) => {
   const { serialnumber, name, amount_paid, installment } = req.body;
 
   // Validate input fields
-  if (!serialnumber || !name || !amount_paid || !installment === undefined) {
+  if (!serialnumber || !name || !amount_paid || installment === undefined) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
@@ -226,23 +226,38 @@ app.post("/addData/:day", async (req, res) => {
   try {
     const tableName = `"${lowerDay}"`; // Ensuring valid table naming convention
 
-    // Insert query using parameterized values
-    const query = `INSERT INTO ${tableName} (serialnumber, name, amount_paid, installment) 
-                   VALUES ($1, $2, $3, $4) RETURNING *`;
-    
+    // Check if the serialnumber exists
+    const checkQuery = `SELECT * FROM line1 WHERE serialnumber = $1 LIMIT 1`;
+    const checkResult = await pool.query(checkQuery, [serialnumber]);
 
-    const result = await pool.query(query, [serialnumber, name, amount_paid, installment]);
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
-    res.status(201).json({
+    // Update totalamount and installment count
+    const user = checkResult.rows[0];
+    const newTotalAmount = user.totalamount - amount_paid;
+    const newInstallment = user.numberofinstallments - 1;
+
+    const updateQuery = `UPDATE line1 
+                         SET totalamount = $1, numberofinstallments = $2 
+                         WHERE serialnumber = $3 
+                         RETURNING *`;
+
+    const updateResult = await pool.query(updateQuery, [newTotalAmount, newInstallment, serialnumber]);
+
+    res.status(200).json({
       success: true,
-      message: "Customer added successfully",
-      data: result.rows[0],
+      message: "Customer record updated successfully",
+      data: updateResult.rows[0],
     });
+
   } catch (error) {
     console.error("Database Error:", error);
     res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
 });
+
 
 // Start Server
 const PORT = 3000;

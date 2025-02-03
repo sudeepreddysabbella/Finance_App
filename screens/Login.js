@@ -38,8 +38,13 @@ const Login = ({ navigation }) => {
         onChangeText={setPassword}
         secureTextEntry
         placeholderTextColor="#A9A9A9"
-        style={{ borderBottomWidth: 1, marginBottom: 10, fontSize: 16 }}
-      />
+        style={{
+          borderBottomWidth: 1,
+          marginBottom: 10,
+          fontSize: 16,
+          color: "black", // Ensures password text is black
+        }}/>
+
       <Button title="Login" onPress={handleLogin} />
       <Button
         title="Signup Instead"
